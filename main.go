@@ -61,12 +61,12 @@ func main() {
 	words := Preprocess(string(incoming))
 
 	// pre-processed data is sent to look for three-word sequences/trigrams
-	ng := ngrams(words, 3)
+	ng := ngramFinder(words, 3)
 
 	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
 	type kv struct {
 		Key   string
-		Value uint32
+		Value int
 	}
 	var ss []kv
 	for k, v := range ng {
@@ -101,16 +101,16 @@ func openFile(filename string) []byte {
 }
 
 // checks for arbitrary-length sequences
-func ngrams(words []string, size int) (count map[string]uint32) {
-	count = make(map[string]uint32)
-	offset := int(float64(size / 2))
+func ngramFinder(words []string, size int) (allgrams map[string]int) {
+	allgrams = make(map[string]int)
+	offset := size / 2
 	max := len(words)
 	for i := range words {
-		if i < offset || i+size-offset > max {
+		if i < offset || i+size-offset > max { //  don't run ngram finder where it will run off the beginning or end of the collection
 			continue
 		}
-		gram := strings.Join(words[i-offset:i+size-offset], " ")
-		count[gram]++
+		gram := strings.Join(words[i-offset:i+size-offset], " ") // collect ngram from words in collection of n/size length (to either side of counter)
+		allgrams[gram]++                                         // increment map counter for given ngram
 	}
-	return count
+	return allgrams
 }

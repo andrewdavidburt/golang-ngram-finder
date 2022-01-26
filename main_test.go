@@ -94,7 +94,7 @@ var words = []string{"but", "here", "is", "an", "artist", "he", "desires", "to",
 	"the", "idolatrous", "dotings", "of", "the", "old", "egyptians", "upon", "broiled", "ibis", "and", "roasted", "river", "horse", "that", "you",
 	"see", "the", "mummies", "of", "those", "creatures", "in", "their", "huge", "bakehouses", "the", "pyramids"}
 
-var ngs = map[string]uint32{
+var ngs = map[string]int{
 	"you yourself feel": 1, "out of sight": 1, "a passenger you": 1, "go as a": 2, "a purse and": 1, "you have something": 1, "not and as": 1,
 	"magic stream before": 1, "without meaning and": 1, "all rivers and": 1, "going to sea": 1, "tigerlilieswhat is the": 1,
 	"old persians hold": 1, "narcissus who because": 1, "am something of": 1, "care of myself": 1, "what not and": 1, "a sort of": 1,
@@ -219,8 +219,8 @@ func TestPreprocess(t *testing.T) {
 	}
 }
 
-func TestNgrams(t *testing.T) {
-	ng := ngrams(words, 3)
+func TestNgramFinder(t *testing.T) {
+	ng := ngramFinder(words, 3)
 	if !reflect.DeepEqual(ng, ngs) {
 		t.Fatalf("Expected %v, got %v", ngs, ng)
 	}
