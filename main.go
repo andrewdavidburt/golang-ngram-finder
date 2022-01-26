@@ -46,9 +46,17 @@ func main() {
 	var incoming string
 
 	if len(os.Args) <= 1 {
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		incoming = string(scanner.Bytes())
+		stat, _ := os.Stdin.Stat()
+		if (stat.Mode() & os.ModeCharDevice) == 0 {
+			scanner := bufio.NewScanner(os.Stdin)
+			for scanner.Scan() {
+				incoming += scanner.Text()
+			}
+		} else {
+			fmt.Println("This program counts 3-word sequences (trigrams) in a document, and outputs the top 100 in order. ")
+			fmt.Println("Please either specify one or more text files after the program on the command-line, or pipe text in via stdin.")
+			os.Exit(0)
+		}
 	} else {
 		for _, file := range os.Args[1:] {
 			incoming += string(openFile(file))
@@ -56,8 +64,6 @@ func main() {
 	}
 
 	words := Preprocess(string(incoming))
-
-	fmt.Println(words)
 
 	ng := ngrams(words, 3)
 
@@ -75,22 +81,25 @@ func main() {
 		return ss[i].Value > ss[j].Value
 	})
 
+	fmt.Println("reference counts:")
 	fmt.Println("1: the sperm whale, 85")
 	fmt.Println("2: the white whale, 71")
 	fmt.Println("3: of the whale, 67")
 	fmt.Println("------------------------")
 	fmt.Println("Rank: 3-Word Sequence, Count")
 	fmt.Println("____________________________")
-	for i := 0; i <= 9; i++ {
-		fmt.Printf("%d: %s, %d\n", i+1, ss[i].Key, ss[i].Value)
+
+	if len(ss) >= 100 {
+		for i := 0; i < 100; i++ {
+			fmt.Printf("%d: %s, %d\n", i+1, ss[i].Key, ss[i].Value)
+		}
+	} else {
+		for i := 0; i < len(ss); i++ {
+			fmt.Printf("%d: %s, %d\n", i+1, ss[i].Key, ss[i].Value)
+		}
 	}
-	fmt.Println("_____")
-
-	// for k, v := range ng {
-	// 	fmt.Printf("\"%v:\": %v, ", k, v)
-	// }
-
 }
+
 func openFile(filename string) []byte {
 
 	data, err := ioutil.ReadFile(filename)
