@@ -16,8 +16,8 @@ func Preprocess(s string) []string {
 	// replace newlines with spaces as separators
 	mid := strings.ReplaceAll(s, "\n", " ")
 
-	// regex replace to keep only letters, numbers, apostrophes, and spaces
-	reg, err := regexp.Compile("[^a-zA-Z0-9' ]+")
+	// regex replace to keep only letters, numbers, and spaces
+	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,17 +76,17 @@ func main() {
 		return ss[i].Value > ss[j].Value
 	})
 
-	fmt.Println("Rank: 3-Word Sequence, Count")
+	fmt.Println("Rank: 3-Word Sequence - Count")
 	fmt.Println("____________________________")
 
 	// top 100 results are output in sorted order. if fewer than 100 results are present, however many are available are output in sorted order.
 	if len(ss) >= 100 {
 		for i := 0; i < 100; i++ {
-			fmt.Printf("%d: %s, %d\n", i+1, ss[i].Key, ss[i].Value)
+			fmt.Printf("%d:   %s - %d\n", i+1, ss[i].Key, ss[i].Value)
 		}
 	} else {
 		for i := 0; i < len(ss); i++ {
-			fmt.Printf("%d: %s, %d\n", i+1, ss[i].Key, ss[i].Value)
+			fmt.Printf("%d:   %s - %d\n", i+1, ss[i].Key, ss[i].Value)
 		}
 	}
 }
