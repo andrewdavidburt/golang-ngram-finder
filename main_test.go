@@ -199,6 +199,7 @@ var ngs = map[string]uint32{
 	"you the dreamiest": 1, "the chief element": 1, "or other crazy": 1,
 }
 
+// iterates through slice to compare values, assuming they're of the same length
 func Equalslice(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
