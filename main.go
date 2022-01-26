@@ -23,12 +23,11 @@ func Preprocess(s string) []string {
 	result := reg.ReplaceAllString(mid, "")
 
 	output := strings.ToLower(result)
-	// fmt.Println(output)
 
-	notALetter := func(char rune) bool {
+	isSpace := func(char rune) bool {
 		return unicode.IsSpace(char)
 	}
-	return strings.FieldsFunc(output, notALetter)
+	return strings.FieldsFunc(output, isSpace)
 }
 
 func main() {
@@ -43,7 +42,7 @@ func main() {
 			}
 		} else {
 			fmt.Println("This program counts 3-word sequences (trigrams) in a document, and outputs the top 100 in order. ")
-			fmt.Println("Please either specify one or more text files after the program on the command-line, or pipe text in via stdin.")
+			fmt.Println("Please either specify one or more text files as arguments after the program on the command-line, or pipe text in via stdin.")
 			os.Exit(0)
 		}
 	} else {
