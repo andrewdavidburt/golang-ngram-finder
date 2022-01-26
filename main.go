@@ -15,17 +15,6 @@ import (
 func Preprocess(s string) []string {
 
 	mid := strings.ReplaceAll(s, "\n", " ")
-	// mid = strings.ReplaceAll(s, "-", " ")
-	// mid = strings.ReplaceAll(s, "—", " ")
-
-	// mid = strings.ReplaceAll(mid, "-", "")
-	// mid = strings.ReplaceAll(mid, "—", "")
-	// mid = strings.ReplaceAll(mid, "_", "")
-	// mid = strings.ReplaceAll(mid, "'", "")
-	// mid = strings.ReplaceAll(mid, ",", "")
-	// mid = strings.ReplaceAll(mid, ".", "")
-	// mid = strings.ReplaceAll(mid, ";", "")
-	// mid = strings.ReplaceAll(mid, "?", "")
 
 	reg, err := regexp.Compile("[^a-zA-Z0-9' ]+")
 	if err != nil {
