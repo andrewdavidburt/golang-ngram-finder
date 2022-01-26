@@ -81,11 +81,6 @@ func main() {
 		return ss[i].Value > ss[j].Value
 	})
 
-	fmt.Println("reference counts:")
-	fmt.Println("1: the sperm whale, 85")
-	fmt.Println("2: the white whale, 71")
-	fmt.Println("3: of the whale, 67")
-	fmt.Println("------------------------")
 	fmt.Println("Rank: 3-Word Sequence, Count")
 	fmt.Println("____________________________")
 
