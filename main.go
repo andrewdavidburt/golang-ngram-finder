@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -31,18 +32,6 @@ func preprocess(s string) []string {
 		return unicode.IsSpace(char)
 	}
 	return strings.FieldsFunc(output, isSpace)
-}
-
-func breakup(complete []string, chunkSize int, ngramLength int) [][]string {
-	var partials [][]string
-	for i := 0; i < len(complete); i += chunkSize {
-		end := i + chunkSize + ngramLength - 1 // retention of ngrams spanning chunks
-		if end > len(complete) {
-			end = len(complete)
-		}
-		partials = append(partials, complete[i:end])
-	}
-	return partials
 }
 
 // just reads a file
@@ -68,6 +57,39 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 	}
 	return allgrams
 }
+
+////////////////////////////////////concurrent version of program start
+
+// breaks up file into arbitrarily sized chunks
+func breakup(complete []string, chunkSize int, ngramLength int) [][]string {
+	var partials [][]string
+	for i := 0; i < len(complete); i += chunkSize {
+		end := i + chunkSize + ngramLength - 1 // retention of ngrams spanning chunks
+		if end > len(complete) {
+			end = len(complete)
+		}
+		partials = append(partials, complete[i:end])
+	}
+	return partials
+}
+
+// channeled version of ngram finder
+func ngramFinderCh(words []string, size int, ch chan<- map[string]int) {
+	allgrams := make(map[string]int)
+	offset := size / 2
+	max := len(words)
+	for i := range words {
+
+		if i < offset || i+size-offset > max { //  don't run ngram finder where it will run off the beginning or end of the collection
+			continue
+		}
+		gram := strings.Join(words[i-offset:i+size-offset], " ") // collect ngram from words in collection of n/size length (to either side of counter)
+		allgrams[gram]++                                         // increment map counter for given ngram
+	}
+	ch <- allgrams
+}
+
+////////////////////////////////////concurrent version of program end
 
 func mergeMaps(maps ...map[string]int) map[string]int {
 	result := make(map[string]int)
@@ -115,26 +137,33 @@ func main() {
 		Value int
 	}
 
-	////////////////////////////////////
+	////////////////////////////////////concurrent version of program start
 
-	// breaks up the file into bite-sized pieces
 	var ngbroken []map[string]int
 	var ngcomplete map[string]int
-
 	var ss3 []kv
 
+	// breaks up the file into bite-sized pieces
 	partials := breakup(words, 1024, 3)
 
-	// finds ngrams in each separate piece
+	// finds ngrams in each separate piece, concurrently
+	var wg sync.WaitGroup
+	ch := make(chan map[string]int)
+	defer close(ch)
 	for _, p := range partials {
-		partgram := ngramFinder(p, 3)
-		ngbroken = append(ngbroken, partgram)
-
+		wg.Add(1)
+		go func() {
+			ngramFinderCh(p, 3, ch)
+			wg.Done()
+		}()
+		ngbroken = append(ngbroken, <-ch)
 	}
+	wg.Wait()
 
 	// merges them back together
 	ngcomplete = mergeMaps(ngbroken...)
 
+	//continues as normal version
 	for k, v := range ngcomplete {
 		ss3 = append(ss3, kv{k, v})
 	}
@@ -147,13 +176,12 @@ func main() {
 		fmt.Printf("%d:   %s - %d\n", i+1, ss3[i].Key, ss3[i].Value)
 	}
 
-	////////////////////////////////////
+	////////////////////////////////////concurrent version of program end
 
 	// pre-processed data is sent to look for three-word sequences/trigrams
 	ng := ngramFinder(words, 3)
 
 	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
-
 	var ss []kv
 	for k, v := range ng {
 		ss = append(ss, kv{k, v})
