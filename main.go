@@ -12,7 +12,7 @@ import (
 	"unicode"
 )
 
-func Preprocess(s string) []string {
+func preprocess(s string) []string {
 	// replace newlines with spaces as separators
 	mid := strings.ReplaceAll(s, "\n", " ")
 
@@ -31,6 +31,56 @@ func Preprocess(s string) []string {
 		return unicode.IsSpace(char)
 	}
 	return strings.FieldsFunc(output, isSpace)
+}
+
+func breakup(complete []string, chunkSize int, ngramLength int) [][]string {
+	var partials [][]string
+	for i := 0; i < len(complete); i += chunkSize {
+		end := i + chunkSize + ngramLength - 1 // retention of ngrams spanning chunks
+		if end > len(complete) {
+			end = len(complete)
+		}
+		partials = append(partials, complete[i:end])
+	}
+	return partials
+}
+
+// just reads a file
+func openFile(filename string) []byte {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Panicf("couldn't read file: %s", err)
+	}
+	return data
+}
+
+// checks for arbitrary-length sequences
+func ngramFinder(words []string, size int) (allgrams map[string]int) {
+	allgrams = make(map[string]int)
+	offset := size / 2
+	max := len(words)
+	for i := range words {
+		if i < offset || i+size-offset > max { //  don't run ngram finder where it will run off the beginning or end of the collection
+			continue
+		}
+		gram := strings.Join(words[i-offset:i+size-offset], " ") // collect ngram from words in collection of n/size length (to either side of counter)
+		allgrams[gram]++                                         // increment map counter for given ngram
+	}
+	return allgrams
+}
+
+func mergeMaps(maps ...map[string]int) map[string]int {
+	result := make(map[string]int)
+	for _, m := range maps {
+		for k, v := range m {
+			if _, ok := result[k]; ok {
+				result[k] = result[k] + v
+			} else {
+				result[k] = v
+			}
+		}
+	}
+	return result
 }
 
 func main() {
@@ -58,16 +108,52 @@ func main() {
 	}
 
 	// incoming data is sent for pre-processing
-	words := Preprocess(string(incoming))
+	words := preprocess(string(incoming))
+
+	type kv struct {
+		Key   string
+		Value int
+	}
+
+	////////////////////////////////////
+
+	// breaks up the file into bite-sized pieces
+	var ngbroken []map[string]int
+	var ngcomplete map[string]int
+
+	var ss3 []kv
+
+	partials := breakup(words, 1024, 3)
+
+	// finds ngrams in each separate piece
+	for _, p := range partials {
+		partgram := ngramFinder(p, 3)
+		ngbroken = append(ngbroken, partgram)
+
+	}
+
+	// merges them back together
+	ngcomplete = mergeMaps(ngbroken...)
+
+	for k, v := range ngcomplete {
+		ss3 = append(ss3, kv{k, v})
+	}
+
+	sort.Slice(ss3, func(i, j int) bool {
+		return ss3[i].Value > ss3[j].Value
+	})
+
+	for i := 0; i < 100; i++ {
+		fmt.Printf("%d:   %s - %d\n", i+1, ss3[i].Key, ss3[i].Value)
+	}
+
+	////////////////////////////////////
 
 	// pre-processed data is sent to look for three-word sequences/trigrams
 	ng := ngramFinder(words, 3)
 
 	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
-	type kv struct {
-		Key   string
-		Value int
-	}
+
 	var ss []kv
 	for k, v := range ng {
 		ss = append(ss, kv{k, v})
@@ -89,28 +175,5 @@ func main() {
 			fmt.Printf("%d:   %s - %d\n", i+1, ss[i].Key, ss[i].Value)
 		}
 	}
-}
 
-// just reads a file
-func openFile(filename string) []byte {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Panicf("couldn't read file: %s", err)
-	}
-	return data
-}
-
-// checks for arbitrary-length sequences
-func ngramFinder(words []string, size int) (allgrams map[string]int) {
-	allgrams = make(map[string]int)
-	offset := size / 2
-	max := len(words)
-	for i := range words {
-		if i < offset || i+size-offset > max { //  don't run ngram finder where it will run off the beginning or end of the collection
-			continue
-		}
-		gram := strings.Join(words[i-offset:i+size-offset], " ") // collect ngram from words in collection of n/size length (to either side of counter)
-		allgrams[gram]++                                         // increment map counter for given ngram
-	}
-	return allgrams
 }

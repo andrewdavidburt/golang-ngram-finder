@@ -213,7 +213,7 @@ func Equalslice(a, b []string) bool {
 }
 
 func TestPreprocess(t *testing.T) {
-	out := Preprocess(incoming)
+	out := preprocess(incoming)
 	if !Equalslice(out, words) {
 		t.Fatalf("Expected %v, got %v", words, out)
 	}
