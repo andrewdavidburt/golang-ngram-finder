@@ -32,7 +32,8 @@ func collectSequenceListConcurrent(words []string) []kv {
 	// merges them back together
 	ngComplete = mergeMaps(ngPartials...)
 
-	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
+	// since maps in golang are inherently unordered, they cannot be sorted.
+	// therefore, an index of some sort is required, such as this slice of key-values
 	for k, v := range ngComplete {
 		sorted = append(sorted, kv{k, v})
 	}
@@ -49,12 +50,14 @@ func ngramFinderConcurrent(words []string, size int, ch chan<- map[string]int) {
 	offset := size / 2
 	max := len(words)
 	for i := range words {
-
-		if i < offset || i+size-offset > max { //  don't run ngram finder where it will run off the beginning or end of the collection
+		//  don't run ngram finder where it will run off the beginning or end of the collection
+		if i < offset || i+size-offset > max {
 			continue
 		}
-		gram := strings.Join(words[i-offset:i+size-offset], " ") // collect ngram from words in collection of n/size length (to either side of counter)
-		allgrams[gram]++                                         // increment map counter for given ngram
+		// collect ngram from words in collection of n/size length (to either side of counter)
+		gram := strings.Join(words[i-offset:i+size-offset], " ")
+		// increment map counter for given ngram
+		allgrams[gram]++
 	}
 	ch <- allgrams
 }

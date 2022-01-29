@@ -12,6 +12,7 @@ import (
 	"unicode"
 )
 
+// for sorting map
 type kv struct {
 	Key   string
 	Value int
@@ -53,11 +54,14 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 	offset := size / 2
 	max := len(words)
 	for i := range words {
-		if i < offset || i+size-offset > max { //  don't run ngram finder where it will run off the beginning or end of the collection
+		//  don't run ngram finder where it will run off the beginning or end of the collection
+		if i < offset || i+size-offset > max {
 			continue
 		}
-		gram := strings.Join(words[i-offset:i+size-offset], " ") // collect ngram from words in collection of n/size length (to either side of counter)
-		allgrams[gram]++                                         // increment map counter for given ngram
+		// collect ngram from words in collection of n/size length (to either side of counter)
+		gram := strings.Join(words[i-offset:i+size-offset], " ")
+		// increment map counter for given ngram
+		allgrams[gram]++
 	}
 	return allgrams
 }
@@ -66,9 +70,11 @@ func setup(args []string) string {
 
 	var incoming string
 
-	// this checks whether there are command-line arguments. if so, it takes in all files as the corpus to check for trigrams.
-	// if not, it checks whether stdin is coming from a pipe or the terminal. if from the terminal, it gives a message describing
-	// what the program does and how to use it. if from a pipe (not terminal), it accepts the piped-in file(s) as input to process.
+	// this checks whether there are command-line arguments.
+	// if so, it takes in all files as the corpus to check for sequences.
+	// if there are none, it checks whether stdin is coming from a pipe or the terminal.
+	// if stdin is from the terminal, it gives the user a message describing what the program does and how to use it.
+	// if stdin is from a pipe (not terminal), it accepts the piped-in file(s) as input to process.
 
 	if len(args) <= 1 {
 		stat, _ := os.Stdin.Stat()
@@ -79,7 +85,10 @@ func setup(args []string) string {
 			}
 		} else {
 			fmt.Println("This program counts 3-word sequences (trigrams) in a document, and outputs the top 100 in order. ")
-			fmt.Println("Please either specify one or more text files as arguments after the program on the command-line, or pipe text in via stdin.")
+			fmt.Println("Please either specify one or more text files as arguments on the command-line, or pipe text in via stdin.")
+			fmt.Println("usage examples (if run from source without build)")
+			fmt.Println("go run . moby-dick.txt")
+			fmt.Println("cat moby-dick.txt|go run .")
 			os.Exit(0)
 		}
 	} else {
@@ -97,8 +106,8 @@ func collectSequenceListSequential(words []string) []kv {
 	// pre-processed data is sent to look for three-word sequences/trigrams
 	ng := ngramFinder(words, 3)
 
-	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
-
+	// since maps in golang are inherently unordered, they cannot be sorted.
+	// therefore, an index of some sort is required, such as this slice of key-values
 	for k, v := range ng {
 		sorted = append(sorted, kv{k, v})
 	}
@@ -110,7 +119,8 @@ func collectSequenceListSequential(words []string) []kv {
 }
 
 func displayOutput(sorted []kv) {
-	// top 100 results are output in sorted order. if fewer than 100 results are present, however many are available are output in sorted order.
+	// top 100 results are output in sorted order. if fewer than 100 results are present,
+	// however many are available are output in sorted order.
 	fmt.Println("Rank: 3-Word Sequence - Count")
 	fmt.Println("____________________________")
 	if len(sorted) >= 100 {
