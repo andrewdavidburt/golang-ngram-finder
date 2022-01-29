@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -79,11 +80,18 @@ func setup(args []string) string {
 	if len(args) <= 1 {
 		stat, _ := os.Stdin.Stat()
 		if (stat.Mode() & os.ModeCharDevice) == 0 {
-			//switch to newreader
-			scanner := bufio.NewScanner(os.Stdin)
-			for scanner.Scan() {
-				incoming += scanner.Text()
+			reader := bufio.NewReader(os.Stdin)
+			var holding []rune
+
+			for {
+				input, _, err := reader.ReadRune()
+				if err != nil && err == io.EOF {
+					break
+				}
+				holding = append(holding, input)
 			}
+			incoming = string(holding)
+
 		} else {
 			fmt.Println("This program counts 3-word sequences (trigrams) in a document, and outputs the top 100 in order. ")
 			fmt.Println("Please either specify one or more text files as arguments on the command-line, or pipe text in via stdin.")
