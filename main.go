@@ -63,8 +63,6 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 	return allgrams
 }
 
-////////////////////////////////////concurrent version of program start
-
 // breaks up file into arbitrarily sized chunks
 func breakup(complete []string, chunkSize int, ngramLength int) [][]string {
 	var partials [][]string
@@ -93,8 +91,6 @@ func ngramFinderConcurrent(words []string, size int, ch chan<- map[string]int) {
 	}
 	ch <- allgrams
 }
-
-////////////////////////////////////concurrent version of program end
 
 func mergeMaps(maps ...map[string]int) map[string]int {
 	result := make(map[string]int)
@@ -210,16 +206,24 @@ func displayOutput(sorted []kv) {
 }
 
 func main() {
+
+	// initial command-line processing and accepting incoming data
 	incoming := setup(os.Args)
 
 	// incoming data is sent for pre-processing
 	words := preprocess(string(incoming))
 
+	// concurrent version of 3-word sequence processing
+	fmt.Println("__________________________")
 	fmt.Println("First, concurrent version:")
+	fmt.Println("__________________________")
 	sortedC := collectSequenceListConcurrent(words)
 	displayOutput(sortedC)
 
+	// sequential version of 3-word sequence processing
+	fmt.Println("_________________________")
 	fmt.Println("Next, sequential version:")
+	fmt.Println("_________________________")
 	sortedS := collectSequenceListSequential(words)
 	displayOutput(sortedS)
 
