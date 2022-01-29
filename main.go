@@ -140,50 +140,50 @@ func setup(args []string) string {
 }
 
 func collectSequenceListConcurrent(words []string) []kv {
-
-	var ngbroken []map[string]int
-	var ngcomplete map[string]int
+	var ngPartials []map[string]int
+	var ngComplete map[string]int
 	var sorted []kv
 
 	// breaks up the file into bite-sized pieces
-	partials := breakup(words, 1024, 3)
+	wordPartials := breakup(words, 1000, 3)
 
 	// finds ngrams in each separate piece, concurrently
 	var wg sync.WaitGroup
 	ch := make(chan map[string]int)
 	defer close(ch)
-	for _, p := range partials {
+	for _, p := range wordPartials {
 		wg.Add(1)
 		go func() {
+			// pre-processed data is sent to look for three-word sequences/trigrams
 			ngramFinderConcurrent(p, 3, ch)
 			wg.Done()
 		}()
-		ngbroken = append(ngbroken, <-ch)
+		ngPartials = append(ngPartials, <-ch)
 	}
 	wg.Wait()
 
 	// merges them back together
-	ngcomplete = mergeMaps(ngbroken...)
+	ngComplete = mergeMaps(ngPartials...)
 
-	//continues as normal version
-	for k, v := range ngcomplete {
+	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
+	for k, v := range ngComplete {
 		sorted = append(sorted, kv{k, v})
 	}
-
 	sort.Slice(sorted, func(i, j int) bool {
 		return sorted[i].Value > sorted[j].Value
 	})
 
 	return sorted
-
 }
 
 func collectSequenceListSequential(words []string) []kv {
+	var sorted []kv
+
 	// pre-processed data is sent to look for three-word sequences/trigrams
 	ng := ngramFinder(words, 3)
 
 	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
-	var sorted []kv
+
 	for k, v := range ng {
 		sorted = append(sorted, kv{k, v})
 	}
@@ -192,7 +192,6 @@ func collectSequenceListSequential(words []string) []kv {
 	})
 
 	return sorted
-
 }
 
 func displayOutput(sorted []kv) {
@@ -216,9 +215,11 @@ func main() {
 	// incoming data is sent for pre-processing
 	words := preprocess(string(incoming))
 
+	fmt.Println("First, concurrent version:")
 	sortedC := collectSequenceListConcurrent(words)
 	displayOutput(sortedC)
 
+	fmt.Println("Next, sequential version:")
 	sortedS := collectSequenceListSequential(words)
 	displayOutput(sortedS)
 
