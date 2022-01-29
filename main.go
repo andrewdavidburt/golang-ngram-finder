@@ -79,6 +79,7 @@ func setup(args []string) string {
 	if len(args) <= 1 {
 		stat, _ := os.Stdin.Stat()
 		if (stat.Mode() & os.ModeCharDevice) == 0 {
+			//switch to newreader
 			scanner := bufio.NewScanner(os.Stdin)
 			for scanner.Scan() {
 				incoming += scanner.Text()

@@ -12,7 +12,7 @@ func collectSequenceListConcurrent(words []string) []kv {
 	var sorted []kv
 
 	// breaks up the file into bite-sized pieces
-	wordPartials := breakup(words, 1000, 3)
+	wordPartials := breakup(words, 100, 3)
 
 	// finds ngrams in each separate piece, concurrently
 	var wg sync.WaitGroup
@@ -80,7 +80,8 @@ func mergeMaps(maps ...map[string]int) map[string]int {
 func breakup(complete []string, chunkSize int, ngramLength int) [][]string {
 	var partials [][]string
 	for i := 0; i < len(complete); i += chunkSize {
-		end := i + chunkSize + ngramLength - 1 // retention of ngrams spanning chunks
+		// retention of n-grams/trigrams spanning two chunks by adding n-1 (2) to chunk size
+		end := i + chunkSize + ngramLength - 1
 		if end > len(complete) {
 			end = len(complete)
 		}
