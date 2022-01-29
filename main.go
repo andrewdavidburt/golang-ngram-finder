@@ -150,9 +150,7 @@ func main() {
 	displayOutput(sortedC)
 	fmt.Println("____________________________")
 
-	fmt.Println("")
-
-	// sequentially processed version of 3-word sequence processing
+	// sequentially processed version of 3-word sequence processing -- remove the remark lines below to run sequentially
 	// fmt.Println("____________________________")
 	// fmt.Println("Sequentially processed version:")
 	// sortedS := collectSequenceListSequential(words)
