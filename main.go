@@ -214,16 +214,14 @@ func main() {
 	words := preprocess(string(incoming))
 
 	// concurrent version of 3-word sequence processing
-	fmt.Println("__________________________")
+	fmt.Println("____________________________")
 	fmt.Println("First, concurrent version:")
-	fmt.Println("__________________________")
 	sortedC := collectSequenceListConcurrent(words)
 	displayOutput(sortedC)
 
 	// sequential version of 3-word sequence processing
-	fmt.Println("_________________________")
+	fmt.Println("____________________________")
 	fmt.Println("Next, sequential version:")
-	fmt.Println("_________________________")
 	sortedS := collectSequenceListSequential(words)
 	displayOutput(sortedS)
 
