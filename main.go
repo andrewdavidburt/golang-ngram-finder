@@ -153,10 +153,10 @@ func main() {
 	fmt.Println("")
 
 	// sequentially processed version of 3-word sequence processing
-	fmt.Println("____________________________")
-	fmt.Println("Sequentially processed version:")
-	sortedS := collectSequenceListSequential(words)
-	displayOutput(sortedS)
-	fmt.Println("____________________________")
+	// fmt.Println("____________________________")
+	// fmt.Println("Sequentially processed version:")
+	// sortedS := collectSequenceListSequential(words)
+	// displayOutput(sortedS)
+	// fmt.Println("____________________________")
 
 }
