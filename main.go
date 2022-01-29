@@ -13,6 +13,11 @@ import (
 	"unicode"
 )
 
+type kv struct {
+	Key   string
+	Value int
+}
+
 func preprocess(s string) []string {
 	// replace newlines with spaces as separators
 	mid := strings.ReplaceAll(s, "\n", " ")
@@ -74,7 +79,7 @@ func breakup(complete []string, chunkSize int, ngramLength int) [][]string {
 }
 
 // channeled version of ngram finder
-func ngramFinderCh(words []string, size int, ch chan<- map[string]int) {
+func ngramFinderConcurrent(words []string, size int, ch chan<- map[string]int) {
 	allgrams := make(map[string]int)
 	offset := size / 2
 	max := len(words)
@@ -105,13 +110,15 @@ func mergeMaps(maps ...map[string]int) map[string]int {
 	return result
 }
 
-func main() {
+func setup(args []string) string {
+
 	var incoming string
 
 	// this checks whether there are command-line arguments. if so, it takes in all files as the corpus to check for trigrams.
 	// if not, it checks whether stdin is coming from a pipe or the terminal. if from the terminal, it gives a message describing
 	// what the program does and how to use it. if from a pipe (not terminal), it accepts the piped-in file(s) as input to process.
-	if len(os.Args) <= 1 {
+
+	if len(args) <= 1 {
 		stat, _ := os.Stdin.Stat()
 		if (stat.Mode() & os.ModeCharDevice) == 0 {
 			scanner := bufio.NewScanner(os.Stdin)
@@ -127,21 +134,16 @@ func main() {
 		for _, file := range os.Args[1:] {
 			incoming += string(openFile(file))
 		}
+
 	}
+	return incoming
+}
 
-	// incoming data is sent for pre-processing
-	words := preprocess(string(incoming))
-
-	type kv struct {
-		Key   string
-		Value int
-	}
-
-	////////////////////////////////////concurrent version of program start
+func collectSequenceListConcurrent(words []string) []kv {
 
 	var ngbroken []map[string]int
 	var ngcomplete map[string]int
-	var ss3 []kv
+	var sorted []kv
 
 	// breaks up the file into bite-sized pieces
 	partials := breakup(words, 1024, 3)
@@ -153,7 +155,7 @@ func main() {
 	for _, p := range partials {
 		wg.Add(1)
 		go func() {
-			ngramFinderCh(p, 3, ch)
+			ngramFinderConcurrent(p, 3, ch)
 			wg.Done()
 		}()
 		ngbroken = append(ngbroken, <-ch)
@@ -165,43 +167,59 @@ func main() {
 
 	//continues as normal version
 	for k, v := range ngcomplete {
-		ss3 = append(ss3, kv{k, v})
+		sorted = append(sorted, kv{k, v})
 	}
 
-	sort.Slice(ss3, func(i, j int) bool {
-		return ss3[i].Value > ss3[j].Value
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].Value > sorted[j].Value
 	})
 
-	for i := 0; i < 100; i++ {
-		fmt.Printf("%d:   %s - %d\n", i+1, ss3[i].Key, ss3[i].Value)
-	}
+	return sorted
 
-	////////////////////////////////////concurrent version of program end
+}
 
+func collectSequenceListSequential(words []string) []kv {
 	// pre-processed data is sent to look for three-word sequences/trigrams
 	ng := ngramFinder(words, 3)
 
 	// since maps in golang are inherently unordered, they cannot be sorted. therefore, an index of some sort is required, such as this slice of key-values
-	var ss []kv
+	var sorted []kv
 	for k, v := range ng {
-		ss = append(ss, kv{k, v})
+		sorted = append(sorted, kv{k, v})
 	}
-	sort.Slice(ss, func(i, j int) bool {
-		return ss[i].Value > ss[j].Value
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].Value > sorted[j].Value
 	})
 
+	return sorted
+
+}
+
+func displayOutput(sorted []kv) {
+	// top 100 results are output in sorted order. if fewer than 100 results are present, however many are available are output in sorted order.
 	fmt.Println("Rank: 3-Word Sequence - Count")
 	fmt.Println("____________________________")
-
-	// top 100 results are output in sorted order. if fewer than 100 results are present, however many are available are output in sorted order.
-	if len(ss) >= 100 {
+	if len(sorted) >= 100 {
 		for i := 0; i < 100; i++ {
-			fmt.Printf("%d:   %s - %d\n", i+1, ss[i].Key, ss[i].Value)
+			fmt.Printf("%d:   %s - %d\n", i+1, sorted[i].Key, sorted[i].Value)
 		}
 	} else {
-		for i := 0; i < len(ss); i++ {
-			fmt.Printf("%d:   %s - %d\n", i+1, ss[i].Key, ss[i].Value)
+		for i := 0; i < len(sorted); i++ {
+			fmt.Printf("%d:   %s - %d\n", i+1, sorted[i].Key, sorted[i].Value)
 		}
 	}
+}
+
+func main() {
+	incoming := setup(os.Args)
+
+	// incoming data is sent for pre-processing
+	words := preprocess(string(incoming))
+
+	sortedC := collectSequenceListConcurrent(words)
+	displayOutput(sortedC)
+
+	sortedS := collectSequenceListSequential(words)
+	displayOutput(sortedS)
 
 }
