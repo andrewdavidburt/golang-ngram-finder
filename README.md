@@ -9,7 +9,7 @@ This program counts three word sequences (trigrams, a case of n-grams) in an inp
 To run:  
 `go run . moby-dick.txt` to count three word sequences in moby-dick.txt  
 `go run . file1.txt file2.txt file3.txt` to count three word sequences in file1.txt, file2.txt, and file3.txt  
-`cat file.txt|go run main.go` also counts three word sequences in file.txt  
+`cat moby-dick.txt|go run .` also counts three word sequences in moby-dick.txt  
 If no file is sent via command-line argument or a pipe, a message is returned explaining what the program does, and how to send it text files.  
 If a file has fewer than 100 three word sequences, it returns however many sequences are available.  
 
