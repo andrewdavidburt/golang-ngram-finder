@@ -24,24 +24,23 @@ type Output struct {
 
 func formResponse(sorted []kv) ([]*Output, error) {
 	var out []*Output
-	if len(sorted) >= 100 {
-		for i := 0; i < 100; i++ {
-			out[i] = &Output{
+	if len(sorted) >= 10 {
+		for i := 0; i < 10; i++ {
+			out = append(out, &Output{
 				Group:    "group",
 				Rank:     i + 1,
 				Sequence: sorted[i].Key,
 				Count:    sorted[i].Value,
-			}
-
+			})
 		}
 	} else {
 		for i := 0; i < len(sorted); i++ {
-			out[i] = &Output{
+			out = append(out, &Output{
 				Group:    "group",
 				Rank:     i + 1,
 				Sequence: sorted[i].Key,
 				Count:    sorted[i].Value,
-			}
+			})
 
 		}
 	}
