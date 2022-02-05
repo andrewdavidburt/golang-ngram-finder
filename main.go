@@ -1,16 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
-	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"regexp"
-	"sort"
 	"strings"
 	"unicode"
 
@@ -90,13 +85,13 @@ func preprocess(s string) []string {
 }
 
 // just reads a file
-func openFile(filename string) []byte {
-	data, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Panicf("couldn't read file: %s", err)
-	}
-	return data
-}
+// func openFile(filename string) []byte {
+// 	data, err := ioutil.ReadFile(filename)
+// 	if err != nil {
+// 		log.Panicf("couldn't read file: %s", err)
+// 	}
+// 	return data
+// }
 
 // checks for arbitrary-length sequences
 func ngramFinder(words []string, size int) (allgrams map[string]int) {
@@ -116,65 +111,65 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 	return allgrams
 }
 
-func setup(args []string) string {
+// func setup(args []string) string {
 
-	var incoming string
+// 	var incoming string
 
-	// this checks whether there are command-line arguments.
-	// if so, it takes in all files as the corpus to check for sequences.
-	// if there are none, it checks whether stdin is coming from a pipe or the terminal.
-	// if stdin is from the terminal, it gives the user a message describing what the program does and how to use it.
-	// if stdin is from a pipe (not terminal), it accepts the piped-in file(s) as input to process.
+// 	// this checks whether there are command-line arguments.
+// 	// if so, it takes in all files as the corpus to check for sequences.
+// 	// if there are none, it checks whether stdin is coming from a pipe or the terminal.
+// 	// if stdin is from the terminal, it gives the user a message describing what the program does and how to use it.
+// 	// if stdin is from a pipe (not terminal), it accepts the piped-in file(s) as input to process.
 
-	if len(args) <= 1 {
-		stat, _ := os.Stdin.Stat()
-		if (stat.Mode() & os.ModeCharDevice) == 0 {
-			reader := bufio.NewReader(os.Stdin)
-			var holding []rune
+// 	if len(args) <= 1 {
+// 		stat, _ := os.Stdin.Stat()
+// 		if (stat.Mode() & os.ModeCharDevice) == 0 {
+// 			reader := bufio.NewReader(os.Stdin)
+// 			var holding []rune
 
-			for {
-				input, _, err := reader.ReadRune()
-				if err != nil && err == io.EOF {
-					break
-				}
-				holding = append(holding, input)
-			}
-			incoming = string(holding)
+// 			for {
+// 				input, _, err := reader.ReadRune()
+// 				if err != nil && err == io.EOF {
+// 					break
+// 				}
+// 				holding = append(holding, input)
+// 			}
+// 			incoming = string(holding)
 
-		} else {
-			fmt.Println("This program counts 3-word sequences (trigrams) in a document, and outputs the top 100 in order. ")
-			fmt.Println("Please either specify one or more text files as arguments on the command-line, or pipe text in via stdin.")
-			fmt.Println("usage examples (if run from source without build)")
-			fmt.Println("go run . moby-dick.txt")
-			fmt.Println("cat moby-dick.txt|go run .")
-			os.Exit(0)
-		}
-	} else {
-		for _, file := range os.Args[1:] {
-			incoming += string(openFile(file))
-		}
+// 		} else {
+// 			fmt.Println("This program counts 3-word sequences (trigrams) in a document, and outputs the top 100 in order. ")
+// 			fmt.Println("Please either specify one or more text files as arguments on the command-line, or pipe text in via stdin.")
+// 			fmt.Println("usage examples (if run from source without build)")
+// 			fmt.Println("go run . moby-dick.txt")
+// 			fmt.Println("cat moby-dick.txt|go run .")
+// 			os.Exit(0)
+// 		}
+// 	} else {
+// 		for _, file := range os.Args[1:] {
+// 			incoming += string(openFile(file))
+// 		}
 
-	}
-	return incoming
-}
+// 	}
+// 	return incoming
+// }
 
-func collectSequenceListSequential(words []string) []kv {
-	var sorted []kv
+// func collectSequenceListSequential(words []string) []kv {
+// 	var sorted []kv
 
-	// pre-processed data is sent to look for three-word sequences/trigrams
-	ng := ngramFinder(words, 3)
+// 	// pre-processed data is sent to look for three-word sequences/trigrams
+// 	ng := ngramFinder(words, 3)
 
-	// since maps in golang are inherently unordered, they cannot be sorted.
-	// therefore, an index of some sort is required, such as this slice of key-values
-	for k, v := range ng {
-		sorted = append(sorted, kv{k, v})
-	}
-	sort.Slice(sorted, func(i, j int) bool {
-		return sorted[i].Value > sorted[j].Value
-	})
+// 	// since maps in golang are inherently unordered, they cannot be sorted.
+// 	// therefore, an index of some sort is required, such as this slice of key-values
+// 	for k, v := range ng {
+// 		sorted = append(sorted, kv{k, v})
+// 	}
+// 	sort.Slice(sorted, func(i, j int) bool {
+// 		return sorted[i].Value > sorted[j].Value
+// 	})
 
-	return sorted
-}
+// 	return sorted
+// }
 
 // func displayOutput(sorted []kv) {
 // 	// top 100 results are output in sorted order. if fewer than 100 results are present,
@@ -194,8 +189,8 @@ func collectSequenceListSequential(words []string) []kv {
 
 func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	incoming := setup(os.Args)
-	words := preprocess(string(incoming))
+	// incoming := setup(req.QueryStringParameters["text"])
+	words := preprocess(req.QueryStringParameters["text"])
 	sortedC := collectSequenceListConcurrent(words)
 	// displayOutput(sortedC)
 
