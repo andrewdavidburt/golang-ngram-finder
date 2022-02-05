@@ -2,16 +2,65 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 )
+
+var errorLogger = log.New(os.Stderr, "error: ", log.Llongfile)
+
+type Output struct {
+	Group    string `json:"group"`
+	Rank     int    `json:"rank"`
+	Sequence string `json:"sequence"`
+	Count    int    `json:"count"`
+}
+
+func formResponse(sorted []kv) ([]*Output, error) {
+	var out []*Output
+	if len(sorted) >= 100 {
+		for i := 0; i < 100; i++ {
+			out[i] = &Output{
+				Group:    "group",
+				Rank:     i + 1,
+				Sequence: sorted[i].Key,
+				Count:    sorted[i].Value,
+			}
+
+		}
+	} else {
+		for i := 0; i < len(sorted); i++ {
+			out[i] = &Output{
+				Group:    "group",
+				Rank:     i + 1,
+				Sequence: sorted[i].Key,
+				Count:    sorted[i].Value,
+			}
+
+		}
+	}
+	return out, nil
+}
+
+func serverError(err error) (events.APIGatewayProxyResponse, error) {
+	errorLogger.Println(err.Error())
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusInternalServerError,
+		Body:       http.StatusText(http.StatusInternalServerError),
+	}, nil
+}
 
 // for sorting map
 type kv struct {
@@ -127,42 +176,54 @@ func collectSequenceListSequential(words []string) []kv {
 	return sorted
 }
 
-func displayOutput(sorted []kv) {
-	// top 100 results are output in sorted order. if fewer than 100 results are present,
-	// however many are available are output in sorted order.
-	fmt.Println("Rank: 3-Word Sequence - Count")
-	fmt.Println("____________________________")
-	if len(sorted) >= 100 {
-		for i := 0; i < 100; i++ {
-			fmt.Printf("%d:   %s - %d\n", i+1, sorted[i].Key, sorted[i].Value)
-		}
-	} else {
-		for i := 0; i < len(sorted); i++ {
-			fmt.Printf("%d:   %s - %d\n", i+1, sorted[i].Key, sorted[i].Value)
-		}
+// func displayOutput(sorted []kv) {
+// 	// top 100 results are output in sorted order. if fewer than 100 results are present,
+// 	// however many are available are output in sorted order.
+// 	fmt.Println("Rank: 3-Word Sequence - Count")
+// 	fmt.Println("____________________________")
+// 	if len(sorted) >= 100 {
+// 		for i := 0; i < 100; i++ {
+// 			fmt.Printf("%d:   %s - %d\n", i+1, sorted[i].Key, sorted[i].Value)
+// 		}
+// 	} else {
+// 		for i := 0; i < len(sorted); i++ {
+// 			fmt.Printf("%d:   %s - %d\n", i+1, sorted[i].Key, sorted[i].Value)
+// 		}
+// 	}
+// }
+
+func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	incoming := setup(os.Args)
+	words := preprocess(string(incoming))
+	sortedC := collectSequenceListConcurrent(words)
+	// displayOutput(sortedC)
+
+	// sortedS := collectSequenceListSequential(words)
+	// displayOutput(sortedS)
+
+	// body, err := callout(req.QueryStringParameters["ip"])
+	// if err != nil {
+	// 	return serverError(err)
+	// }
+
+	out, err := formResponse(sortedC)
+	if err != nil {
+		return serverError(err)
 	}
+
+	jsout, err := json.Marshal(out)
+	if err != nil {
+		return serverError(err)
+	}
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       string(jsout),
+	}, nil
+
 }
 
 func main() {
-
-	// initial command-line processing and accepting incoming data
-	incoming := setup(os.Args)
-
-	// incoming data is sent for pre-processing
-	words := preprocess(string(incoming))
-
-	// concurrently processed version of 3-word sequence processing
-	fmt.Println("____________________________")
-	fmt.Println("Concurrently processed version:")
-	sortedC := collectSequenceListConcurrent(words)
-	displayOutput(sortedC)
-	fmt.Println("____________________________")
-
-	// sequentially processed version of 3-word sequence processing -- remove the remark lines below to run sequentially
-	// fmt.Println("____________________________")
-	// fmt.Println("Sequentially processed version:")
-	// sortedS := collectSequenceListSequential(words)
-	// displayOutput(sortedS)
-	// fmt.Println("____________________________")
-
+	lambda.Start(manager)
 }
