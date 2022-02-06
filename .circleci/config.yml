@@ -5,10 +5,9 @@ jobs:
   lambda:
     docker:
       # - image: circleci/golang:1.15
-      - image: cimg/go:1.15
+      - image: cimg/go:1.15.8
     parameters:
-      working-directory:
-        default: deploy
+      working-directory: ~/repo
     steps:
       # - attach_workspace:
       #    at: .
