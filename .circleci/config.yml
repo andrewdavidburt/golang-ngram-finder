@@ -41,7 +41,7 @@ jobs:
       - run:
           name: Deploy 
           command: |
-            aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip --region us-west-2
+            aws lambda update-function-code --function-name nrapp --zip-file fileb://./nrapp.zip --region us-west-2
 
 workflows:
   main:
