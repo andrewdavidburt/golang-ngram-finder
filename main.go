@@ -14,6 +14,7 @@ import (
 	"unicode"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 var errorLogger = log.New(os.Stderr, "error: ", log.Llongfile)
@@ -214,18 +215,20 @@ func callout(uri string) ([]byte, error) {
 	return body, nil
 }
 
-// func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-func main() {
+func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// func main() {
 	var words []string
 
-	// if _, ok := req.QueryStringParameters["uri"]; ok {
-	val := "https://www.gutenberg.org/files/2701/2701-0.txt"
-	body, err := callout(val)
-
-	words = preprocess(string(body))
-	// } else {
-	// words = preprocess(req.QueryStringParameters["text"])
-	// }
+	if val, ok := req.QueryStringParameters["uri"]; ok {
+		// val := "https://www.gutenberg.org/files/2701/2701-0.txt"
+		body, err := callout(val)
+		if err != nil {
+			return serverError(err)
+		}
+		words = preprocess(string(body))
+	} else {
+		words = preprocess(req.QueryStringParameters["text"])
+	}
 
 	// incoming := setup(req.QueryStringParameters["text"])
 
@@ -235,30 +238,25 @@ func main() {
 	// sortedS := collectSequenceListSequential(words)
 	// displayOutput(sortedS)
 
-	// body, err := callout(req.QueryStringParameters["ip"])
-	// if err != nil {
-	// 	return serverError(err)
-	// }
-
 	out, err := formResponse(sortedC)
-	// if err != nil {
-	// 	return serverError(err)
-	// }
+	if err != nil {
+		return serverError(err)
+	}
 
 	jsout, err := json.Marshal(out)
-	// if err != nil {
-	// 	return serverError(err)
-	// }
+	if err != nil {
+		return serverError(err)
+	}
 
-	// return events.APIGatewayProxyResponse{
-	// 	StatusCode: http.StatusOK,
-	// 	Body:       string(jsout),
-	// }, nil
-	fmt.Println(err)
-	fmt.Println(string(jsout))
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Body:       string(jsout),
+	}, nil
+	// fmt.Println(err)
+	// fmt.Println(string(jsout))
 
 }
 
-// func main() {
-// 	lambda.Start(manager)
-// }
+func main() {
+	lambda.Start(manager)
+}
