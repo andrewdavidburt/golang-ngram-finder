@@ -2,8 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -68,29 +66,23 @@ type kv struct {
 
 func preprocess(s string) []string {
 	// replace newlines with spaces as separators
-	log.Println("a")
 	mid := strings.ReplaceAll(s, "\n", " ")
-	log.Println("b")
+
 	// regex replace to keep only letters, numbers, and spaces
 	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
-	log.Println("c")
 	if err != nil {
-		log.Println("d")
 		log.Fatal(err)
 	}
 	log.Println("e")
 	result := reg.ReplaceAllString(mid, "")
 	log.Println("f")
+
 	// force all to lower-case
 	output := strings.ToLower(result)
-	log.Println("g")
 	// break string into slice of strings (words) based on space character
-	log.Println("h")
 	isSpace := func(char rune) bool {
-		log.Println("i")
 		return unicode.IsSpace(char)
 	}
-	log.Println("j")
 	return strings.FieldsFunc(output, isSpace)
 }
 
@@ -198,54 +190,39 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 // }
 
 func callout(uri string) ([]byte, error) {
-	log.Println("TEST1a")
 	client := &http.Client{}
 	_, err := url.ParseRequestURI(uri)
 	if err != nil {
-		log.Println("TEST1b")
-		return nil, errors.New(fmt.Sprint("hi"))
+		return nil, err
 	}
-	log.Println("TEST1c")
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		log.Println("TEST1d")
-		return nil, errors.New(fmt.Sprint("hi2"))
+		return nil, err
 	}
-	log.Println("TEST1e")
 	req.Header.Add("Accept", "text/plain")
 
 	resp, err := client.Do(req)
-	log.Println("TEST1f")
 	if err != nil {
-		log.Println("TEST1g")
-		return nil, errors.New(fmt.Sprint("hi3"))
+		return nil, err
 	}
 	defer resp.Body.Close()
-	log.Println("TEST1h")
 	body, err := ioutil.ReadAll(resp.Body)
-	log.Println("TEST1i")
 	if err != nil {
-		log.Println("TEST1j")
-		return nil, errors.New(fmt.Sprint("hi4"))
+		return nil, err
 	}
-	log.Println("TEST1k")
 	return body, nil
 }
 
 func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// func main() {
 	var words []string
-	log.Println("TEST1")
 	if val, ok := req.QueryStringParameters["uri"]; ok {
 		val = "https://www.gutenberg.org/files/2701/2701-0.txt"
 		body, err := callout(val)
-		log.Println("TEST2")
 		if err != nil {
-			log.Println("TEST3")
-			return serverError(errors.New(fmt.Sprint("hi5")))
+			return serverError(err)
 		}
 		log.Println("TEST4")
-
 		words = preprocess(string(body))
 		log.Println("TEST5")
 	} else {
@@ -262,12 +239,12 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	out, err := formResponse(sortedC)
 	if err != nil {
-		return serverError(errors.New(fmt.Sprint("hi6")))
+		return serverError(err)
 	}
 
 	jsout, err := json.Marshal(out)
 	if err != nil {
-		return serverError(errors.New(fmt.Sprint("hi7")))
+		return serverError(err)
 	}
 
 	return events.APIGatewayProxyResponse{
