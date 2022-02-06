@@ -89,9 +89,8 @@ func preprocess(s string) []string {
 	isSpace := func(char rune) bool {
 		log.Println("i")
 		return unicode.IsSpace(char)
-		log.Println("j")
 	}
-	log.Println("k")
+	log.Println("j")
 	return strings.FieldsFunc(output, isSpace)
 }
 
