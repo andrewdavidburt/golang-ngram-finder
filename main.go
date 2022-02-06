@@ -220,7 +220,7 @@ func callout(uri string) ([]byte, error) {
 func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// func main() {
 	var words []string
-
+	log.Println("TEST1")
 	if val, ok := req.QueryStringParameters["uri"]; ok {
 		val = "https://www.gutenberg.org/files/2701/2701-0.txt"
 		body, err := callout(val)
@@ -231,7 +231,7 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	} else {
 		words = preprocess(req.QueryStringParameters["text"])
 	}
-
+	log.Println("TEST2")
 	// incoming := setup(req.QueryStringParameters["text"])
 
 	sortedC := collectSequenceListConcurrent(words)
