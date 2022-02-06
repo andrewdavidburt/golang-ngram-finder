@@ -220,7 +220,7 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	var words []string
 
 	if val, ok := req.QueryStringParameters["uri"]; ok {
-		// val := "https://www.gutenberg.org/files/2701/2701-0.txt"
+		val = "https://www.gutenberg.org/files/2701/2701-0.txt"
 		body, err := callout(val)
 		if err != nil {
 			return serverError(err)
