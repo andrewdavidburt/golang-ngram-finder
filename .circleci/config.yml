@@ -2,7 +2,7 @@
 version: 2.1
 
 jobs:
-  build:
+  build-deploy:
     working_directory: ~/repo
     docker:
       # - image: circleci/golang:1.15
@@ -30,8 +30,6 @@ jobs:
           name: Package
           command: |
             zip -j ./nrapp.zip ./main
-  deploy:
-    steps:
       - run:
           name: Deploy 
           command: |
@@ -40,6 +38,5 @@ jobs:
 workflows:
   main:
     jobs:
-      - build
-      - deploy
+      - build-deploy
       
