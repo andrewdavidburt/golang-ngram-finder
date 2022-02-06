@@ -220,10 +220,15 @@ func callout(uri string) ([]byte, error) {
 
 func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var words []string
+	client := &http.Client{}
 	log.Println("test1")
-	if val, ok := req.QueryStringParameters["uri"]; ok {
+	if _, ok := req.QueryStringParameters["uri"]; ok {
 		log.Println("test2")
-		body, err := callout(val)
+		// body, err := callout(val)
+		req, err := http.NewRequest("GET", "https://www.gutenberg.org/files/2701/2701-0.txt", nil)
+		resp, err := client.Do(req)
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
 		log.Println("test3")
 		if err != nil {
 			return serverError(err)
