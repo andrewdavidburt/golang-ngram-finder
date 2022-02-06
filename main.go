@@ -68,22 +68,30 @@ type kv struct {
 
 func preprocess(s string) []string {
 	// replace newlines with spaces as separators
+	log.Println("a")
 	mid := strings.ReplaceAll(s, "\n", " ")
-
+	log.Println("b")
 	// regex replace to keep only letters, numbers, and spaces
 	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
+	log.Println("c")
 	if err != nil {
+		log.Println("d")
 		log.Fatal(err)
 	}
+	log.Println("e")
 	result := reg.ReplaceAllString(mid, "")
-
+	log.Println("f")
 	// force all to lower-case
 	output := strings.ToLower(result)
-
+	log.Println("g")
 	// break string into slice of strings (words) based on space character
+	log.Println("h")
 	isSpace := func(char rune) bool {
+		log.Println("i")
 		return unicode.IsSpace(char)
+		log.Println("j")
 	}
+	log.Println("k")
 	return strings.FieldsFunc(output, isSpace)
 }
 
@@ -238,7 +246,7 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 			return serverError(errors.New(fmt.Sprint("hi5")))
 		}
 		log.Println("TEST4")
-		log.Println(string(body))
+
 		words = preprocess(string(body))
 		log.Println("TEST5")
 	} else {
