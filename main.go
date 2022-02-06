@@ -202,6 +202,8 @@ func callout(uri string) ([]byte, error) {
 		return nil, err
 	}
 
+	req.Header.Add("Accept", "text/plain")
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
