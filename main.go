@@ -247,14 +247,14 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		return serverError(err)
 	}
 
-	_, err = json.Marshal(out)
+	jsout, err := json.Marshal(out)
 	if err != nil {
 		return serverError(err)
 	}
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       string("jsout"),
+		Body:       string(jsout),
 	}, nil
 
 }
