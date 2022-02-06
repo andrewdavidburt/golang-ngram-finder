@@ -191,29 +191,37 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 // }
 
 func callout(uri string) ([]byte, error) {
+	log.Println("TEST1a")
 	client := &http.Client{}
 	_, err := url.ParseRequestURI(uri)
 	if err != nil {
+		log.Println("TEST1b")
 		return nil, errors.New(fmt.Sprint("hi"))
 	}
-
+	log.Println("TEST1c")
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
+		log.Println("TEST1d")
 		return nil, errors.New(fmt.Sprint("hi2"))
 	}
-
+	log.Println("TEST1e")
 	req.Header.Add("Accept", "text/plain")
 
 	resp, err := client.Do(req)
+	log.Println("TEST1f")
 	if err != nil {
+		log.Println("TEST1g")
 		return nil, errors.New(fmt.Sprint("hi3"))
 	}
 	defer resp.Body.Close()
+	log.Println("TEST1h")
 	body, err := ioutil.ReadAll(resp.Body)
+	log.Println("TEST1i")
 	if err != nil {
+		log.Println("TEST1j")
 		return nil, errors.New(fmt.Sprint("hi4"))
 	}
-
+	log.Println("TEST1k")
 	return body, nil
 }
 
