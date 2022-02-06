@@ -6,20 +6,26 @@ jobs:
     docker:
       # - image: circleci/golang:1.15
       - image: cimg/go:1.15.8
-    # working_directory: ~/repo
+    working_directory: ~/repo
     steps:
       # - attach_workspace:
       #    at: .
       - checkout
+      # - run: 
+      #     name: Test
+      #     command: go test
       - run:
           name: Build
-          command: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v  -mod=vendor -ldflags="-w -s" -o "./main" "nrapp"
+          command: |
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v  -mod=vendor -ldflags="-w -s" -o "./main" "nrapp"
       - run:
           name: Package
-          command: zip -j ./nrapp.zip ./main
+          command: |
+            zip -j ./nrapp.zip ./main
       - run:
           name: Deploy 
-          command: aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
+          command: |
+            aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
 
 workflows:
   main:
