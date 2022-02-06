@@ -9,19 +9,19 @@ jobs:
       - image: cimg/go:1.15
     steps:
       - checkout
-      # - restore_cache:
-      #     keys:
-      #       - go-mod-v4-{{ checksum "go.sum" }}
+      - restore_cache:
+          keys:
+            - go-mod-v4-{{ checksum "go.sum" }}
       - run:
           name: Get Deps
           command: go mod download
-      # - save_cache:
-      #     key: go-mod-v4-{{ checksum "go.sum" }}
-      #     paths:
-      #       - "/go/pkg/mod"
-      # - run: 
-      #     name: Test
-      #     command: go test
+      - save_cache:
+          key: go-mod-v4-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run: 
+          name: Test
+          command: go test
       - run:
           name: Build
           command: |
@@ -31,12 +31,15 @@ jobs:
           command: |
             zip -j ./nrapp.zip ./main
   # deploy:
-  #   working_directory: ~/repo
   #   steps:
+  #     - run:
+  #         name: Update 
+  #         command: |
+  #           aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
   #     - run:
   #         name: Deploy 
   #         command: |
-  #           aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
+  #           aws apigateway create-deployment --rest-api-id vnp5rwu1u8 --stage-name staging
 
 workflows:
   main:
