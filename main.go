@@ -73,19 +73,14 @@ func preprocess(s string) []string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("e")
 	result := reg.ReplaceAllString(mid, "")
-	log.Println("f")
 
 	// force all to lower-case
 	output := strings.ToLower(result)
-	log.Println("g")
 	// break string into slice of strings (words) based on space character
 	isSpace := func(char rune) bool {
-		log.Println("h")
 		return unicode.IsSpace(char)
 	}
-	log.Println("i")
 	return strings.FieldsFunc(output, isSpace)
 }
 
@@ -220,18 +215,15 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	// func main() {
 	var words []string
 	if val, ok := req.QueryStringParameters["uri"]; ok {
-		val = "https://www.gutenberg.org/files/2701/2701-0.txt"
+		// val = "https://www.gutenberg.org/files/2701/2701-0.txt"
 		body, err := callout(val)
 		if err != nil {
 			return serverError(err)
 		}
-		log.Println("TEST4")
 		words = preprocess(string(body))
-		log.Println("TEST5")
 	} else {
 		words = preprocess(req.QueryStringParameters["text"])
 	}
-	log.Println("TEST6")
 	// incoming := setup(req.QueryStringParameters["text"])
 
 	sortedC := collectSequenceListConcurrent(words)
