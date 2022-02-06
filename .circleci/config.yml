@@ -2,15 +2,23 @@
 version: 2.1
 
 jobs:
-  lambda:
+  build:
+    working_directory: ~/repo
     docker:
       # - image: circleci/golang:1.15
-      - image: cimg/go:1.15.8
-    working_directory: ~/repo
+      - image: cimg/go:1.15
     steps:
-      # - attach_workspace:
-      #    at: .
       - checkout
+      # - restore_cache:
+      #     keys:
+      #       - go-mod-v4-{{ checksum "go.sum" }}
+      - run:
+          name: Get Deps
+          command: go mod download
+      # - save_cache:
+      #     key: go-mod-v4-{{ checksum "go.sum" }}
+      #     paths:
+      #       - "/go/pkg/mod"
       # - run: 
       #     name: Test
       #     command: go test
@@ -22,13 +30,17 @@ jobs:
           name: Package
           command: |
             zip -j ./nrapp.zip ./main
-      - run:
-          name: Deploy 
-          command: |
-            aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
+  # deploy:
+  #   working_directory: ~/repo
+  #   steps:
+  #     - run:
+  #         name: Deploy 
+  #         command: |
+  #           aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
 
 workflows:
   main:
     jobs:
-      - lambda
+      - build
+      # - deploy
       
