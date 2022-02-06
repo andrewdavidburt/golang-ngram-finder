@@ -1,0 +1,30 @@
+# .circleci/config.yml
+version: 2.1
+
+jobs:
+  lambda:
+    docker:
+      # - image: circleci/golang:1.15
+      - image: cimg/go:1.15
+    parameters:
+      working-directory:
+        default: deploy
+    steps:
+      # - attach_workspace:
+      #    at: .
+      - checkout
+      - run:
+          name: Build
+          command: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v  -mod=vendor -ldflags="-w -s" -o "./main" "nrapp"
+      - run:
+          name: Package
+          command: zip -j ./nrapp.zip ./main
+      - run:
+          name: Deploy 
+          command: aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
+
+workflows:
+  main:
+    jobs:
+      - lambda
+      
