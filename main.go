@@ -213,7 +213,7 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       string(jsout),
+		Body:       string("jsout"),
 	}, nil
 
 }
