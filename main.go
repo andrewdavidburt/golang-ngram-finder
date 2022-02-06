@@ -79,10 +79,13 @@ func preprocess(s string) []string {
 
 	// force all to lower-case
 	output := strings.ToLower(result)
+	log.Println("g")
 	// break string into slice of strings (words) based on space character
 	isSpace := func(char rune) bool {
+		log.Println("h")
 		return unicode.IsSpace(char)
 	}
+	log.Println("i")
 	return strings.FieldsFunc(output, isSpace)
 }
 
