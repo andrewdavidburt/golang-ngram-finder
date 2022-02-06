@@ -225,7 +225,7 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		val = "https://www.gutenberg.org/files/2701/2701-0.txt"
 		body, err := callout(val)
 		if err != nil {
-			return serverError(errors.New(fmt.Sprint("hi5"))
+			return serverError(errors.New(fmt.Sprint("hi5")))
 		}
 		words = preprocess(string(body))
 	} else {
@@ -242,12 +242,12 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	out, err := formResponse(sortedC)
 	if err != nil {
-		return serverError(errors.New(fmt.Sprint("hi6"))
+		return serverError(errors.New(fmt.Sprint("hi6")))
 	}
 
 	jsout, err := json.Marshal(out)
 	if err != nil {
-		return serverError(errors.New(fmt.Sprint("hi7"))
+		return serverError(errors.New(fmt.Sprint("hi7")))
 	}
 
 	return events.APIGatewayProxyResponse{
