@@ -30,20 +30,16 @@ jobs:
           name: Package
           command: |
             zip -j ./nrapp.zip ./main
-  # deploy:
-  #   steps:
-  #     - run:
-  #         name: Update 
-  #         command: |
-  #           aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip
-  #     - run:
-  #         name: Deploy 
-  #         command: |
-  #           aws apigateway create-deployment --rest-api-id vnp5rwu1u8 --stage-name staging
+  deploy:
+    steps:
+      - run:
+          name: Deploy 
+          command: |
+            aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip --region us-west-2
 
 workflows:
   main:
     jobs:
       - build
-      # - deploy
+      - deploy
       
