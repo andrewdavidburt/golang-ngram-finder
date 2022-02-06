@@ -1,8 +1,10 @@
 # .circleci/config.yml
 version: 2.1
+# orbs: 
+#   aws-code-deploy: circleci/aws-code-deploy@2.0.0
 
 jobs:
-  build-deploy:
+  build:
     working_directory: ~/repo
     docker:
       # - image: circleci/golang:1.15
@@ -31,6 +33,12 @@ jobs:
           command: |
             zip -j ./nrapp.zip ./main
       - run:
+          name: install awscli
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y python-pip python-dev
+            sudo pip install awscli
+      - run:
           name: Deploy 
           command: |
             aws lambda update-function-code --function-name nrapp --zip-file fileb://./main.zip --region us-west-2
@@ -38,5 +46,11 @@ jobs:
 workflows:
   main:
     jobs:
-      - build-deploy
+      - build
+  # deploy_application:
+  #   jobs:
+  #     - aws-code-deploy/deploy:
+  #         application-name: nrapp
+  #         deployment-group: myDeploymentGroup
+  #         service-role-arn: myDeploymentGroupRoleARN
       
