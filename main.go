@@ -191,25 +191,25 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 // }
 
 func callout(uri string) ([]byte, error) {
-
+	log.Println("test4")
 	client := &http.Client{}
 
 	_, err := url.ParseRequestURI(uri)
 	if err == nil {
 		return nil, errors.New(fmt.Sprint(http.StatusBadRequest))
 	}
-
+	log.Println("test5")
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return nil, err
 	}
-
+	log.Println("test6")
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-
+	log.Println("test7")
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -220,8 +220,11 @@ func callout(uri string) ([]byte, error) {
 
 func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var words []string
+	log.Println("test1")
 	if val, ok := req.QueryStringParameters["uri"]; ok {
+		log.Println("test2")
 		body, err := callout(val)
+		log.Println("test3")
 		if err != nil {
 			return serverError(err)
 		}
