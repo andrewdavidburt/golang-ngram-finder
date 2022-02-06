@@ -194,24 +194,24 @@ func callout(uri string) ([]byte, error) {
 	client := &http.Client{}
 	_, err := url.ParseRequestURI(uri)
 	if err != nil {
-		return nil, errors.New(fmt.Sprint(http.StatusBadRequest))
+		return nil, errors.New(fmt.Sprint("hi"))
 	}
 
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprint("hi2"))
 	}
 
 	req.Header.Add("Accept", "text/plain")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprint("hi3"))
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprint("hi4"))
 	}
 
 	return body, nil
