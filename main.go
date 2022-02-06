@@ -2,8 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -186,10 +190,47 @@ func ngramFinder(words []string, size int) (allgrams map[string]int) {
 // 	}
 // }
 
-func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func callout(uri string) ([]byte, error) {
 
+	client := &http.Client{}
+
+	_, err := url.ParseRequestURI(uri)
+	if err == nil {
+		return nil, errors.New(fmt.Sprint(http.StatusBadRequest))
+	}
+
+	req, err := http.NewRequest("GET", uri, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var words []string
+	if val, ok := req.QueryStringParameters["uri"]; ok {
+		body, err := callout(val)
+		if err != nil {
+			return serverError(err)
+		}
+		words = preprocess(string(body))
+	} else {
+		words = preprocess(req.QueryStringParameters["text"])
+	}
 	// incoming := setup(req.QueryStringParameters["text"])
-	words := preprocess(req.QueryStringParameters["text"])
+
 	sortedC := collectSequenceListConcurrent(words)
 	// displayOutput(sortedC)
 
