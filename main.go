@@ -232,14 +232,18 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	if val, ok := req.QueryStringParameters["uri"]; ok {
 		val = "https://www.gutenberg.org/files/2701/2701-0.txt"
 		body, err := callout(val)
+		log.Println("TEST2")
 		if err != nil {
+			log.Println("TEST3")
 			return serverError(errors.New(fmt.Sprint("hi5")))
 		}
-		words = preprocess(string(body))
+		log.Println("TEST4")
+		words = preprocess(string(body)
+		log.Println("TEST5"))
 	} else {
 		words = preprocess(req.QueryStringParameters["text"])
 	}
-	log.Println("TEST2")
+	log.Println("TEST6")
 	// incoming := setup(req.QueryStringParameters["text"])
 
 	sortedC := collectSequenceListConcurrent(words)
