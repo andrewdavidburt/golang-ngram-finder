@@ -238,8 +238,8 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 			return serverError(errors.New(fmt.Sprint("hi5")))
 		}
 		log.Println("TEST4")
-		words = preprocess(string(body)
-		log.Println("TEST5"))
+		words = preprocess(string(body))
+		log.Println("TEST5")
 	} else {
 		words = preprocess(req.QueryStringParameters["text"])
 	}
