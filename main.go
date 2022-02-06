@@ -206,7 +206,7 @@ func manager(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		return serverError(err)
 	}
 
-	jsout, err := json.Marshal(out)
+	_, err = json.Marshal(out)
 	if err != nil {
 		return serverError(err)
 	}
