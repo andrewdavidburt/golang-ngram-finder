@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Build
           command: |
-            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v  -mod=vendor -ldflags="-w -s" -o "./main" "nrapp"
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o "./main" "nrapp"
       - run:
           name: Package
           command: |
