@@ -1,7 +1,6 @@
 package main
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -52,12 +51,5 @@ func TestPreprocess(t *testing.T) {
 	out := preprocess(incoming)
 	if !Equalslice(out, words) {
 		t.Fatalf("Expected %v, got %v", words, out)
-	}
-}
-
-func TestNgramFinder(t *testing.T) {
-	ng := ngramFinder(words, 3)
-	if !reflect.DeepEqual(ng, ngs) {
-		t.Fatalf("Expected %v, got %v", ngs, ng)
 	}
 }

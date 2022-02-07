@@ -1,13 +1,10 @@
 # .circleci/config.yml
 version: 2.1
-# orbs: 
-#   aws-code-deploy: circleci/aws-code-deploy@2.0.0
 
 jobs:
-  build:
+  lambda:
     working_directory: ~/repo
     docker:
-      # - image: circleci/golang:1.15
       - image: cimg/go:1.15
     steps:
       - checkout
@@ -46,11 +43,4 @@ jobs:
 workflows:
   main:
     jobs:
-      - build
-  # deploy_application:
-  #   jobs:
-  #     - aws-code-deploy/deploy:
-  #         application-name: nrapp
-  #         deployment-group: myDeploymentGroup
-  #         service-role-arn: myDeploymentGroupRoleARN
-      
+      - lambda
