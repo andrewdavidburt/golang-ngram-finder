@@ -11,11 +11,11 @@ Note: Please see new addendum at bottom.
 #### Usage
 To run:  
 
-`go run main.go file.txt` to count three word sequences in file.txt  
+`go run . moby-dick.txt` to count three word sequences in file.txt  
 
-`go run main.go file1.txt file2.txt file3.txt` to count three word sequences in file1.txt, file2.txt, and file3.txt 
+`go run . moby-dick.txt file2.txt file3.txt` to count three word sequences in file1.txt, file2.txt, and file3.txt 
 
-`cat file.txt|go run main.go` also counts three word sequences in file.txt  
+`cat moby-dick.txt|go run .` also counts three word sequences in file.txt  
 
 If no file is sent via command-line argument or a pipe, a message is returned explaining what the program does, and how to send it text files.  
 If a file has fewer than 100 three word sequences, it returns however many sequences are available.  
