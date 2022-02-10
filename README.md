@@ -1,4 +1,4 @@
-# Golang Code Sample
+# Golang N-gram Finder
 # Variation: AWS Lambda REST API version w/CircleCI CI/CD pipeline
 ## (`rest-lambda` branch)
 
