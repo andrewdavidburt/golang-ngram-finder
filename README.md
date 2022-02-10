@@ -3,7 +3,7 @@
 ## Variation: AWS Lambda REST API version w/CircleCI CI/CD pipeline
 
 ###  Andrew Burt
-### (`rest-lambda` branch)
+#### (`rest-lambda` branch)
 
 This program counts three word sequences (trigrams, a case of n-grams) in an input text, and returns the top 100 ranked sequences with counts.  There is an alternate version, on the `rest-lambda` branch, that run as an AWS lambda function, and is auto-deployed using CircleCI (described in the addendum).
 
