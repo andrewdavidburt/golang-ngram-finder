@@ -1,5 +1,5 @@
-# New Relic Golang Assessment
-## Variation: AWS Lambda REST API version w/CircleCI CI/CD pipeline
+# Golang Code Sample
+# Variation: AWS Lambda REST API version w/CircleCI CI/CD pipeline
 ## (`rest-lambda` branch)
 
 ## 100 most common three word sequences in text
