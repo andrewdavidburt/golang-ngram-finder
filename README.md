@@ -12,6 +12,10 @@ In order to make sure I understood the basics of CI/CD pipelines, I adapted the 
 
 `https://github.com/andrewdavidburt/nr-assessment/tree/rest-lambda`  
 
+The original command-line version is on the main branch, here:
+
+`https://github.com/andrewdavidburt/nr-assessment`
+
 Currently, every time I push to this branch, CircleCI tests and builds the code, then if everything passes it deploys it as an AWS lambda function behind an API Gateway.  
 The deployed instance can be accessed in either of two ways:  
 Simply but clunkily, you can send in words via the `text` arg on the uri:  
