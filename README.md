@@ -1,4 +1,4 @@
-# Golang Code Sample 
+# Golang N-gram Finder
 
 ## 100 most common three word sequences in text
 
