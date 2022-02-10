@@ -8,9 +8,7 @@
 This program counts three word sequences (trigrams, a case of n-grams) in an input text, and returns the top 100 ranked sequences with counts.  There is an alternate version, on the `rest-lambda` branch, that run as an AWS lambda function, and is auto-deployed using CircleCI (described in the addendum).
 
 #### Usage
-In order to make sure I understood the basics of CI/CD pipelines, I adapted the program to be an AWS lambda function, and then learned the basics of CircleCI to set up a very basic CI/CD pipeline. The source for this is sitting on the `rest-lambda` branch, found here:  
-
-`https://github.com/andrewdavidburt/nr-assessment/tree/rest-lambda`  
+In order to make sure I understood the basics of CI/CD pipelines, I adapted the program to be an AWS lambda function, and then learned the basics of CircleCI to set up a very basic CI/CD pipeline. The source for this is sitting on the `rest-lambda` branch.
 
 The original command-line version is on the main branch, here:
 
